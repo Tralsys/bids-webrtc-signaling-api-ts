@@ -7,6 +7,7 @@ src/index.ts
 src/models/ApiInfo.ts
 src/models/ApplicationInfo.ts
 src/models/ClientInfo.ts
+src/models/ClientInfoWithToken.ts
 src/models/GetClientInfoList401Response.ts
 src/models/OfferClientRole.ts
 src/models/PostSDPOfferInfoRequestBody.ts

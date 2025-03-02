@@ -48,13 +48,6 @@ export interface ApplicationInfo {
      */
     owner: string;
     /**
-     * デフォルトロール
-     * 
-     * @type {string}
-     * @memberof ApplicationInfo
-     */
-    defaultRole: string;
-    /**
      * 作成日時
      * 
      * @type {Date}
@@ -71,7 +64,6 @@ export function instanceOfApplicationInfo(value: object): value is ApplicationIn
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('description' in value) || value['description'] === undefined) return false;
     if (!('owner' in value) || value['owner'] === undefined) return false;
-    if (!('defaultRole' in value) || value['defaultRole'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     return true;
 }
@@ -90,7 +82,6 @@ export function ApplicationInfoFromJSONTyped(json: any, ignoreDiscriminator: boo
         'name': json['name'],
         'description': json['description'],
         'owner': json['owner'],
-        'defaultRole': json['default_role'],
         'createdAt': (new Date(json['created_at'])),
     };
 }
@@ -109,7 +100,6 @@ export function ApplicationInfoFromJSONTyped(json: any, ignoreDiscriminator: boo
         'name': value['name'],
         'description': value['description'],
         'owner': value['owner'],
-        'default_role': value['defaultRole'],
     };
 }
 

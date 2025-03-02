@@ -16,11 +16,14 @@
 import * as runtime from '../runtime';
 import type {
   ClientInfo,
+  ClientInfoWithToken,
   GetClientInfoList401Response,
 } from '../models/index';
 import {
     ClientInfoFromJSON,
     ClientInfoToJSON,
+    ClientInfoWithTokenFromJSON,
+    ClientInfoWithTokenToJSON,
     GetClientInfoList401ResponseFromJSON,
     GetClientInfoList401ResponseToJSON,
 } from '../models/index';
@@ -29,12 +32,16 @@ export interface DeleteClientInfoRequest {
     clientId: string;
 }
 
+export interface GetClientAccessTokenRequest {
+    body: string;
+}
+
 export interface GetClientInfoRequest {
     clientId: string;
 }
 
 export interface RegisterClientInfoRequest {
-    clientInfo: Omit<ClientInfo, 'app_id'|'client_id'|'created_at'|'last_used_at'>;
+    clientInfo: Omit<ClientInfo, 'client_id'|'created_at'>;
 }
 
 /**
@@ -43,7 +50,7 @@ export interface RegisterClientInfoRequest {
 export class ClientManagementApi extends runtime.BaseAPI {
 
     /**
-     * クライアントの情報を削除する  物理削除のため、復元はできません 
+     * クライアントの情報を削除する 
      * Clientの情報を削除する
      */
     async deleteClientInfoRaw(requestParameters: DeleteClientInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -77,11 +84,53 @@ export class ClientManagementApi extends runtime.BaseAPI {
     }
 
     /**
-     * クライアントの情報を削除する  物理削除のため、復元はできません 
+     * クライアントの情報を削除する 
      * Clientの情報を削除する
      */
     async deleteClientInfo(requestParameters: DeleteClientInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.deleteClientInfoRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * リフレッシュトークンを用いて、アクセストークンを取得する 
+     * Clientのアクセストークンを取得する
+     */
+    async getClientAccessTokenRaw(requestParameters: GetClientAccessTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling getClientAccessToken().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/jose';
+
+        const response = await this.request({
+            path: `/client_token`,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * リフレッシュトークンを用いて、アクセストークンを取得する 
+     * Clientのアクセストークンを取得する
+     */
+    async getClientAccessToken(requestParameters: GetClientAccessTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.getClientAccessTokenRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -167,7 +216,7 @@ export class ClientManagementApi extends runtime.BaseAPI {
      * クライアントの情報を登録する 
      * Clientの情報を登録する
      */
-    async registerClientInfoRaw(requestParameters: RegisterClientInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClientInfo>> {
+    async registerClientInfoRaw(requestParameters: RegisterClientInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClientInfoWithToken>> {
         if (requestParameters['clientInfo'] == null) {
             throw new runtime.RequiredError(
                 'clientInfo',
@@ -197,14 +246,14 @@ export class ClientManagementApi extends runtime.BaseAPI {
             body: ClientInfoToJSON(requestParameters['clientInfo']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ClientInfoFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClientInfoWithTokenFromJSON(jsonValue));
     }
 
     /**
      * クライアントの情報を登録する 
      * Clientの情報を登録する
      */
-    async registerClientInfo(requestParameters: RegisterClientInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientInfo> {
+    async registerClientInfo(requestParameters: RegisterClientInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientInfoWithToken> {
         const response = await this.registerClientInfoRaw(requestParameters, initOverrides);
         return await response.value();
     }

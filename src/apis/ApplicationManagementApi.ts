@@ -26,6 +26,10 @@ export interface GetApplicationInfoRequest {
     appId: string;
 }
 
+export interface PostApplicationInfoRequest {
+    applicationInfo: Omit<ApplicationInfo, 'app_id'|'created_at'>;
+}
+
 /**
  * 
  */
@@ -63,6 +67,52 @@ export class ApplicationManagementApi extends runtime.BaseAPI {
      */
     async getApplicationInfo(requestParameters: GetApplicationInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApplicationInfo> {
         const response = await this.getApplicationInfoRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * アプリケーションを作成する (アプリ作成権限がある場合のみ実行可能) 
+     * Applicationを作成する
+     */
+    async postApplicationInfoRaw(requestParameters: PostApplicationInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApplicationInfo>> {
+        if (requestParameters['applicationInfo'] == null) {
+            throw new runtime.RequiredError(
+                'applicationInfo',
+                'Required parameter "applicationInfo" was null or undefined when calling postApplicationInfo().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/apps`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ApplicationInfoToJSON(requestParameters['applicationInfo']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApplicationInfoFromJSON(jsonValue));
+    }
+
+    /**
+     * アプリケーションを作成する (アプリ作成権限がある場合のみ実行可能) 
+     * Applicationを作成する
+     */
+    async postApplicationInfo(requestParameters: PostApplicationInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApplicationInfo> {
+        const response = await this.postApplicationInfoRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

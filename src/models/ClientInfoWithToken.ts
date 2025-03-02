@@ -16,55 +16,63 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface ClientInfo
+ * @interface ClientInfoWithToken
  */
-export interface ClientInfo {
+export interface ClientInfoWithToken {
     /**
      * アプリID
      * 
      * @type {string}
-     * @memberof ClientInfo
+     * @memberof ClientInfoWithToken
      */
-    appId: string;
+    readonly appId: string;
     /**
      * クライアントID
      * 
      * @type {string}
-     * @memberof ClientInfo
+     * @memberof ClientInfoWithToken
      */
     readonly clientId: string;
     /**
      * 名前
      * 
      * @type {string}
-     * @memberof ClientInfo
+     * @memberof ClientInfoWithToken
      */
     name: string;
     /**
      * 作成日時
      * 
      * @type {Date}
-     * @memberof ClientInfo
+     * @memberof ClientInfoWithToken
      */
     readonly createdAt: Date;
+    /**
+     * リフレッシュトークン
+     * 
+     * @type {string}
+     * @memberof ClientInfoWithToken
+     */
+    readonly refreshToken: string;
 }
 
 /**
- * Check if a given object implements the ClientInfo interface.
+ * Check if a given object implements the ClientInfoWithToken interface.
  */
-export function instanceOfClientInfo(value: object): value is ClientInfo {
+export function instanceOfClientInfoWithToken(value: object): value is ClientInfoWithToken {
     if (!('appId' in value) || value['appId'] === undefined) return false;
     if (!('clientId' in value) || value['clientId'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
+    if (!('refreshToken' in value) || value['refreshToken'] === undefined) return false;
     return true;
 }
 
-export function ClientInfoFromJSON(json: any): ClientInfo {
-    return ClientInfoFromJSONTyped(json, false);
+export function ClientInfoWithTokenFromJSON(json: any): ClientInfoWithToken {
+    return ClientInfoWithTokenFromJSONTyped(json, false);
 }
 
-export function ClientInfoFromJSONTyped(json: any, ignoreDiscriminator: boolean): ClientInfo {
+export function ClientInfoWithTokenFromJSONTyped(json: any, ignoreDiscriminator: boolean): ClientInfoWithToken {
     if (json == null) {
         return json;
     }
@@ -74,21 +82,21 @@ export function ClientInfoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
         'clientId': json['client_id'],
         'name': json['name'],
         'createdAt': (new Date(json['created_at'])),
+        'refreshToken': json['refresh_token'],
     };
 }
 
-  export function ClientInfoToJSON(json: any): ClientInfo {
-      return ClientInfoToJSONTyped(json, false);
+  export function ClientInfoWithTokenToJSON(json: any): ClientInfoWithToken {
+      return ClientInfoWithTokenToJSONTyped(json, false);
   }
 
-  export function ClientInfoToJSONTyped(value?: Omit<ClientInfo, 'client_id'|'created_at'> | null, ignoreDiscriminator: boolean = false): any {
+  export function ClientInfoWithTokenToJSONTyped(value?: Omit<ClientInfoWithToken, 'app_id'|'client_id'|'created_at'|'refresh_token'> | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'app_id': value['appId'],
         'name': value['name'],
     };
 }
